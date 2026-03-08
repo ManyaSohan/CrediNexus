@@ -1,4 +1,8 @@
-# 💳 Credit Approval System
+# 💳 CrediNexus – Intelligent Credit Approval & Risk Assessment Platform
+
+<p align="center">
+AI-powered fintech system that automates loan approval decisions using data-driven credit risk analysis.
+</p>
 
 <p align="center">
   <img src="https://img.shields.io/badge/Django-092E20?style=for-the-badge&logo=django&logoColor=white" alt="Django">
@@ -9,14 +13,15 @@
 </p>
 
 <p align="center">
-  A robust <strong>Credit Approval System</strong> built with Django REST Framework that evaluates loan eligibility based on historical data and implements intelligent credit scoring algorithms.
+<strong>CrediNexus</strong>is an intelligent credit approval and financial risk assessment platform built with Django REST Framework. 
+It evaluates loan eligibility using historical financial data and dynamic credit scoring algorithms to automate lending decisions.
 </p>
 
 ---
 
 ## 📌 Overview
 
-This **Credit Approval System** is designed to assess loan applications by analyzing customer credit history, calculating dynamic credit scores, and making intelligent approval decisions. The system processes historical customer and loan data to provide real-time credit evaluations with appropriate interest rate corrections.
+This **CrediNexus** is designed to assess loan applications by analyzing customer credit history, calculating dynamic credit scores, and making intelligent approval decisions. The system processes historical customer and loan data to provide real-time credit evaluations with appropriate interest rate corrections.
 
 ## 🛠️ Features
 
