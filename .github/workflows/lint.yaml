@@ -1,0 +1,160 @@
+name: Lint and Code Quality
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+env:
+  PYTHON_VERSION: '3.12'
+
+jobs:
+  black-linting:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4    
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'    
+      - name: Install Black
+        run: |
+          python -m pip install --upgrade pip
+          pip install black    
+      - name: Run Black code formatting check
+        run: |
+          echo "🎨 Running Black code style check..."
+          black --check --diff .
+  type-checking:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Install type checking tools
+        run: |
+          pip install mypy django-stubs djangorestframework-stubs
+          pip install types-requests types-redis types-PyYAML
+
+      - name: Create mypy config
+        run: |
+          cat > pyproject.toml << EOF
+          [tool.mypy]
+          python_version = "3.12"
+          check_untyped_defs = true
+          ignore_missing_imports = true
+          warn_unused_ignores = true
+          warn_redundant_casts = true
+          strict_optional = true
+          
+          [[tool.mypy.overrides]]
+          module = ["*.migrations.*", "manage", "*.settings.*"]
+          ignore_errors = true
+          EOF
+
+      - name: Run mypy type checking
+        run: |
+          echo "🔍 Running mypy type checking..."
+          mypy . || true
+
+  security-linting:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Install security tools
+        run: pip install bandit[toml] safety
+
+      - name: Create bandit config
+        run: |
+          cat > pyproject.toml << EOF
+          [tool.bandit]
+          exclude_dirs = ["migrations", "venv", ".venv", "tests"]
+          skips = ["B101", "B601"]
+          EOF
+
+      - name: Run bandit security linting
+        run: |
+          echo "🔒 Running bandit security scan..."
+          bandit -r . || true
+
+      - name: Run safety check
+        run: |
+          echo "🔒 Running safety vulnerability check..."
+          safety check || true
+
+  complexity-analysis:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+
+      - name: Install analysis tools
+        run: |
+          python -m pip install --upgrade pip
+          pip install radon xenon
+
+      - name: Run complexity analysis
+        run: |
+          echo "📊 Running complexity analysis..."
+          radon cc . --average --show-complexity
+          radon mi .
+
+      - name: Check complexity thresholds
+        run: |
+          echo "🎯 Checking complexity thresholds..."
+          xenon --max-absolute B --max-modules A --max-average A . || true
+
+  documentation:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+
+      - name: Install documentation tools
+        run: |
+          python -m pip install --upgrade pip
+          pip install interrogate
+
+      - name: Check documentation coverage
+        run: |
+          echo "📚 Checking documentation coverage..."
+          interrogate -v --ignore-init-method --ignore-magic --ignore-module --ignore-nested-functions --fail-under 70 . || true
